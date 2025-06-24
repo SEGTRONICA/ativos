@@ -22,7 +22,7 @@ def carregar_dados(url):
     csv_url = url.replace("/edit?usp=sharing", "/export?format=csv")
     try:
         df = pd.read_csv(csv_url)
-        df['ID do Ativo'] = df['ID do Ativo'].astype(str)
+        df['ID DO ATIVO'] = df['ID DO ATIVO'].astype(str)
         return df
     except Exception as e:
         st.error(f"Não foi possível carregar os dados da planilha. Verifique o link e as permissões. Erro: {e}")
