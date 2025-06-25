@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(layout="wide", page_title="Visor de Ativos")
 st.title("Ativos Segtrônica")
-
+st.logo('logo.png',size='large')
 # --- CARREGAMENTO DOS SEGREDOS --
 try:
     SHEET_URL_ATIVOS = st.secrets["SHEET_URL_ATIVOS"] # Nome novo
