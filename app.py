@@ -58,7 +58,6 @@ else:
             # Exibe o ID e o botão para copiar
             with st.button("📋", key="copy"):
                 clipboard.copy(id_ativo_escaneado)
-                st.code(id_ativo_escaneado, language="text")
 
             st.subheader("Passo 2: Abra o formulário e cole o ID")
             st.markdown(f'''
