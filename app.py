@@ -25,7 +25,7 @@ def carregar_dados(url):
     try:
         df = pd.read_csv(csv_url)
         # Garante que a coluna do ID seja do tipo string para a comparação correta
-        df['ID do Ativo'] = df['ID do Ativo'].astype(str)
+        df['ID DO ATIVO'] = df['ID DO ATIVO'].astype(str)
         return df
     except Exception:
         # Se a planilha não puder ser carregada, retorna um DataFrame vazio
@@ -43,11 +43,11 @@ else:
     # Se um ID foi passado, carrega os dados
     df = carregar_dados(SHEET_URL)
     
-    if df.empty and 'ID do Ativo' not in df.columns:
+    if df.empty and 'ID DO ATIVO' not in df.columns:
         st.error("Não foi possível carregar os dados dos ativos ou a coluna 'ID do Ativo' não foi encontrada. Verifique a planilha.")
     else:
         # Procura pelo ativo na planilha
-        ativo_info = df[df['ID do Ativo'] == id_ativo_escaneado]
+        ativo_info = df[df['ID DO ATIVO'] == id_ativo_escaneado]
 
         # SE O ATIVO FOI ENCONTRADO, MOSTRA OS DADOS
         if not ativo_info.empty:
