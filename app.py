@@ -1,69 +1,98 @@
 import streamlit as st
 import pandas as pd
 
-# --- CÓDIGO DE PRODUÇÃO FINAL (VERSÃO "COPIAR E COLAR") ---
+st.set_page_config(layout="wide", page_title="Visor de Ativos")
+st.title("Visor de Ativos e Manutenção")
 
-st.set_page_config(layout="centered", page_title="Visor de Ativos")
-st.title("Visor de Ativos")
-
+# --- CARREGAMENTO DOS SEGREDOS ---
 try:
-    SHEET_URL = st.secrets["SHEET_URL"]
-    FORM_URL = st.secrets["FORM_URL"]
+    SHEET_URL_ATIVOS = st.secrets["SHEET_URL"]
+    FORM_URL_CADASTRO = st.secrets["FORM_URL"]
+    
+    # Carrega a nova URL do formulário de manutenção
+    HISTORICO_SHEET_URL = st.secrets["HISTORICO_SHEET_URL"] # Você precisa criar essa planilha e o secret
+    MANUTENCAO_FORM_URL = st.secrets["MANUTENCAO_FORM_URL"]
+
 except KeyError as e:
-    st.error(f"ERRO DE CONFIGURAÇÃO: O segredo '{e}' não foi encontrado!")
+    st.error(f"ERRO DE CONFIGURAÇÃO: O segredo '{e}' não foi encontrado! Verifique o painel do Streamlit.")
     st.stop()
 
+# --- FUNÇÕES DE CARREGAMENTO DE DADOS ---
+@st.cache_data(ttl=60) # Adiciona cache para melhorar a performance
 def carregar_dados(url):
     csv_url = url.replace("/edit?usp=sharing", "/export?format=csv")
     try:
-        df = pd.read_csv(csv_url)
-        df['ID DO ATIVO'] = df['ID DO ATIVO'].astype(str)
+        df = pd.read_csv(csv_url, dtype=str) # Lê todas as colunas como texto para evitar erros
         return df
     except Exception:
         return pd.DataFrame()
 
+# --- LÓGICA PRINCIPAL ---
 query_params = st.query_params
 id_ativo_escaneado = query_params.get("id_ativo")
 
+# Carrega ambos os DataFrames
+df_ativos = carregar_dados(SHEET_URL_ATIVOS)
+df_historico = carregar_dados(HISTORICO_SHEET_URL)
+
 if not id_ativo_escaneado:
     st.info("Bem-vindo! Escaneie o QR Code de um ativo para começar.")
+    st.subheader("Lista de Ativos Cadastrados")
+    if not df_ativos.empty:
+        st.dataframe(df_ativos)
+
 else:
-    df = carregar_dados(SHEET_URL)
-    
-    if df.empty and 'ID DO ATIVO' not in df.columns:
-        st.error("Não foi possível carregar os dados ou a coluna 'ID DO ATIVO' não foi encontrada. Verifique a planilha.")
+    if df_ativos.empty:
+        st.error("Não foi possível carregar a lista de ativos.")
     else:
-        ativo_info = df[df['ID DO ATIVO'] == id_ativo_escaneado]
+        ativo_info = df_ativos[df_ativos['ID DO ATIVO'] == id_ativo_escaneado]
+        
         if not ativo_info.empty:
-            st.success(f"Ativo encontrado!")
             ativo = ativo_info.iloc[0]
-            st.header(ativo['Nome do dispositivo'])
-            st.subheader(ativo['Tipo do Ativo'])
-            st.write(f"Numero do Pedido: {ativo['Numero do Pedido']}")
-            st.write(f"**Localização:** {ativo['Cliente']}")
-            st.write(f"**Modelo do Ativo**: {ativo['Modelo do Ativo']}")
-            st.write(f"**Tipo de negócio: {ativo['Tipo de negócio']}**")
-            st.write(f"Data de instalação: {ativo['Data de instalação']}")
-            st.write(f"Ultima autação: {ativo['Data e descrição da última atuação no dispositivo']}")
-            st.write(f"Instalador: {ativo['Endereço de e-mail']}")
+            st.success(f"Ativo encontrado!")
+            
+            # Layout com duas colunas para melhor organização
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.header(ativo['Nome do dispositivo'])
+                st.subheader(ativo['Tipo do Ativo'])
+                st.write(f"**Numero do Pedido:** {ativo['Numero do Pedido']}")
+                st.write(f"**Cliente:** {ativo['Cliente']}")
+                st.write(f"**Modelo do Ativo:** {ativo['Modelo do Ativo']}")
+                st.write(f"**Tipo de negócio:** {ativo['Tipo de negócio']}")
+                st.write(f"**Data de instalação:** {ativo['Data de instalação']}")
+                st.write(f"**Instalador:** {ativo['Endereço de e-mail']}")
+            
+            with col2:
+                st.header("Registrar Nova Atuação")
+                # Link para o formulário de manutenção, pré-preenchendo o ID
+                link_manutencao = f"{MANUTENCAO_FORM_URL}?usp=pp_url&entry.SEU_ENTRY_ID_AQUI={id_ativo_escaneado}"
+                
+                st.markdown(f'''
+                    <a href="{link_manutencao}" target="_blank" style="
+                        display: inline-block; padding: 12px 20px; font-size: 18px;
+                        font-weight: bold; color: white; background-color: #FFA500; /* Laranja */
+                        text-align: center; text-decoration: none; border-radius: 8px;">
+                        ⚙️ Adicionar Atuação
+                    </a>
+                ''', unsafe_allow_html=True)
+
+            st.divider()
+
+            # --- SEÇÃO DE HISTÓRICO DE MANUTENÇÃO ---
+            st.header("Histórico de Atuações no Dispositivo")
+            if not df_historico.empty:
+                historico_do_ativo = df_historico[df_historico['ID DO ATIVO'] == id_ativo_escaneado]
+                if not historico_do_ativo.empty:
+                    # Mostra o histórico, ordenando pela data mais recente primeiro
+                    st.dataframe(historico_do_ativo.sort_values(by='Data da Atuação', ascending=False))
+                else:
+                    st.info("Nenhuma atuação registrada para este dispositivo.")
+            else:
+                st.info("Nenhum histórico de atuação encontrado.")
 
         else:
-            # --- NOVA LÓGICA DE CADASTRO ---
+            # Lógica para cadastrar um novo ativo (simplificada)
             st.warning("Ativo ainda não cadastrado.")
-            st.header("Siga os passos para cadastrar:")
-
-            st.subheader("Passo 1: Copie o ID do Ativo")
-            st.info("Este é o identificador único para este ativo. Você vai precisar colá-lo no formulário.")
-            st.code(id_ativo_escaneado, language=None)
-
-            st.subheader("Passo 2: Abra o formulário e cole o ID")
-            st.markdown(f'''
-                <a href="{FORM_URL}" target="_blank" style="
-                    display: inline-block; padding: 12px 20px; font-size: 18px;
-                    font-weight: bold; color: white; background-color: #4CAF50;
-                    text-align: center; text-decoration: none; border-radius: 8px;">
-                    📝 Abrir Formulário de Cadastro
-                </a>
-            ''', unsafe_allow_html=True)
-
-            st.info("Após preencher e enviar o formulário, escaneie o QR Code novamente para ver os detalhes do ativo.")
+            st.markdown(f'<a href="{FORM_URL_CADASTRO}" target="_blank">Clique aqui para ir ao formulário de cadastro.</a>', unsafe_allow_html=True)
