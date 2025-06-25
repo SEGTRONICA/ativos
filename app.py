@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 
-# --- CÓDIGO DE PRODUÇÃO COM DIAGNÓSTICO DE LINK ---
 
 st.set_page_config(layout="centered", page_title="Visor de Ativos")
 st.title("Visor de Ativos")
@@ -9,7 +8,7 @@ st.title("Visor de Ativos")
 try:
     SHEET_URL = st.secrets["SHEET_URL"]
     FORM_URL = st.secrets["FORM_URL"]
-    FORM_ENTRY_ID = "entry.1882245704" # O ID que você configurou
+    FORM_ENTRY_ID = "entry.1882245704" 
 except KeyError as e:
     st.error(f"ERRO DE CONFIGURAÇÃO: O segredo '{e}' não foi encontrado!")
     st.stop()
@@ -18,7 +17,6 @@ def carregar_dados(url):
     csv_url = url.replace("/edit?usp=sharing", "/export?format=csv")
     try:
         df = pd.read_csv(csv_url)
-        # Atenção: O nome da coluna aqui deve ser EXATAMENTE igual ao da sua planilha
         df['ID DO ATIVO'] = df['ID DO ATIVO'].astype(str)
         return df
     except Exception:
@@ -40,19 +38,23 @@ else:
         if not ativo_info.empty:
             st.success(f"Ativo encontrado!")
             ativo = ativo_info.iloc[0]
-            st.header(ativo['Nome do Ativo'])
-            st.write(f"**Localização:** {ativo['Localização']}")
-
+            st.header(ativo['Nome do dispositivo'])
+            st.subhear(ativo['Tipo do Ativo (Câmera, Gravador e etc)'])
+            st.write(f"Numero do Pedido: {ativo['Numero do Pedido']}")
+            st.write(f"**Localização:** {ativo['Cliente']}")
+            st.write(f"**Modelo do Ativo**: {ativo['Modelo do Ativo']}")
+            st.write(f"**Tipo de negócio: {ativo['Tipo de negócio']}**")
+            st.write(f"Data de instalação: {ativo['Data de instalação']}")
+            st.write(f"Ultima autação: {ativo['Data e descrição da última atuação no dispositivo']}")
+            st.write(f"Instalador: {ativo['']}")
+            st.write(f"Data de instalação: {ativo['Endereço de e-mail']}")
+                
         else:
             st.warning("Ativo ainda não cadastrado.")
             st.header("Por favor, cadastre este ativo")
 
             link_preenchido = f"{FORM_URL}?usp=pp_url&{FORM_ENTRY_ID}={id_ativo_escaneado}"
             
-            # --- LINHA DE DIAGNÓSTICO ADICIONADA ---
-            st.info("A aplicação está tentando te redirecionar para o seguinte link:")
-            st.code(link_preenchido, language="text")
-            # ------------------------------------
 
             st.markdown(f'''
                 <a href="{link_preenchido}" target="_blank" style="
