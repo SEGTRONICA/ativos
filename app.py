@@ -4,25 +4,24 @@ import pandas as pd
 st.set_page_config(layout="wide", page_title="Visor de Ativos")
 st.title("Visor de Ativos e Manutenção")
 
-# --- CARREGAMENTO DOS SEGREDOS ---
+# --- CARREGAMENTO DOS SEGREDOS --
 try:
-    SHEET_URL_ATIVOS = st.secrets["SHEET_URL"]
-    FORM_URL_CADASTRO = st.secrets["FORM_URL"]
+    SHEET_URL_ATIVOS = st.secrets["SHEET_URL_ATIVOS"] # Nome novo
+    HISTORICO_SHEET_URL = st.secrets["HISTORICO_SHEET_URL"] # Nome novo
     
-    # Carrega a nova URL do formulário de manutenção
-    HISTORICO_SHEET_URL = st.secrets["HISTORICO_SHEET_URL"] # Você precisa criar essa planilha e o secret
+    FORM_URL_CADASTRO = st.secrets["FORM_URL"]
     MANUTENCAO_FORM_URL = st.secrets["MANUTENCAO_FORM_URL"]
 
 except KeyError as e:
     st.error(f"ERRO DE CONFIGURAÇÃO: O segredo '{e}' não foi encontrado! Verifique o painel do Streamlit.")
     st.stop()
-
+    
 # --- FUNÇÕES DE CARREGAMENTO DE DADOS ---
-@st.cache_data(ttl=60) # Adiciona cache para melhorar a performance
-def carregar_dados(url):
-    csv_url = url.replace("/edit?usp=sharing", "/export?format=csv")
+@st.cache_data(ttl=60)
+def carregar_dados(url_completa):
     try:
-        df = pd.read_csv(csv_url, dtype=str) # Lê todas as colunas como texto para evitar erros
+        # A URL já vem pronta dos segredos, não precisa mais do .replace()
+        df = pd.read_csv(url_completa, dtype=str)
         return df
     except Exception:
         return pd.DataFrame()
