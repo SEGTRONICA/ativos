@@ -1,49 +1,81 @@
 import streamlit as st
 import pandas as pd
-import time
-import urllib.error
 
-# --- CÓDIGO DE DEPURACIÓN AVANÇADA PARA PROBLEMAS DE CONEXÃO ---
+# --- CÓDIGO DE PRODUÇÃO FINAL DO VISUALIZADOR DE ATIVOS ---
 
-st.set_page_config(layout="centered", page_title="Depurador Avançado")
-st.title("Depurador de Conexão")
-st.write("Este código tenta diagnosticar problemas de conexão entre o Streamlit e o Google Sheets.")
-st.write("---")
+# Configuração inicial da página
+st.set_page_config(layout="centered", page_title="Visor de Ativos")
+st.title("Visor de Ativos")
 
-# 1. Carrega os segredos
+# --- LÓGICA PRINCIPAL ---
+
+# 1. Carrega os segredos (URLs) de forma segura
 try:
     SHEET_URL = st.secrets["SHEET_URL"]
-    st.success("Segredo 'SHEET_URL' carregado com sucesso.")
-except KeyError:
-    st.error("ERRO: O segredo 'SHEET_URL' não foi encontrado!")
+    FORM_URL = st.secrets["FORM_URL"]
+    # IMPORTANTE: Garanta que este ID do campo está correto!
+    FORM_ENTRY_ID = "entry.xxxxxxxx" # Substitua pelo seu entry.ID real
+except KeyError as e:
+    st.error(f"ERRO DE CONFIGURAÇÃO: O segredo '{e}' não foi encontrado! Vá em Settings -> Secrets e configure-o no painel do Streamlit.")
     st.stop()
 
-# 2. Monta a URL de download do CSV, agora com um "cache buster" para forçar uma nova conexão
-csv_url_base = SHEET_URL.replace("/edit?usp=sharing", "/export?format=csv")
-cache_buster = f"&dummy_cache_buster={int(time.time())}"
-csv_url_final = csv_url_base + cache_buster
+# Função para carregar e preparar os dados da planilha
+def carregar_dados(url):
+    csv_url = url.replace("/edit?usp=sharing", "/export?format=csv")
+    try:
+        df = pd.read_csv(csv_url)
+        # Garante que a coluna do ID seja do tipo string para a comparação correta
+        df['ID do Ativo'] = df['ID do Ativo'].astype(str)
+        return df
+    except Exception:
+        # Se a planilha não puder ser carregada, retorna um DataFrame vazio
+        return pd.DataFrame()
 
-st.header("URL de Acesso Final")
-st.info("O Streamlit tentará acessar a seguinte URL para baixar os dados:")
-st.code(csv_url_final, language="text")
+# 2. Pega o ID do ativo da URL da página
+query_params = st.query_params
+id_ativo_escaneado = query_params.get("id_ativo")
 
-# 3. Tenta carregar os dados com tratamento de erro detalhado
-st.header("Tentativa de Conexão")
-try:
-    st.write("Tentando `pd.read_csv(url)`...")
-    df = pd.read_csv(csv_url_final)
-    st.success("SUCESSO! A planilha foi carregada e lida pelo Pandas!")
-    st.write("Amostra dos dados:")
-    st.dataframe(df.head())
+# 3. Decide o que mostrar na tela
+if not id_ativo_escaneado:
+    # Se nenhum ID for passado na URL, mostra a tela de boas-vindas
+    st.info("Bem-vindo! Escaneie o QR Code de um ativo para começar.")
+else:
+    # Se um ID foi passado, carrega os dados
+    df = carregar_dados(SHEET_URL)
+    
+    if df.empty and 'ID do Ativo' not in df.columns:
+        st.error("Não foi possível carregar os dados dos ativos ou a coluna 'ID do Ativo' não foi encontrada. Verifique a planilha.")
+    else:
+        # Procura pelo ativo na planilha
+        ativo_info = df[df['ID do Ativo'] == id_ativo_escaneado]
 
-except urllib.error.HTTPError as e:
-    st.error(f"ERRO DE HTTP: O servidor do Google retornou um código de erro.")
-    st.write(f"**Código de Status:** {e.code}")
-    st.write(f"**Motivo:** {e.reason}")
-    st.write("Isso geralmente significa um problema de permissão que afeta apenas o servidor. Verifique as permissões da planilha novamente como garantia.")
+        # SE O ATIVO FOI ENCONTRADO, MOSTRA OS DADOS
+        if not ativo_info.empty:
+            st.success(f"Ativo encontrado!")
+            ativo = ativo_info.iloc[0]
+            
+            st.header(ativo['Nome do Ativo'])
+            st.write(f"**Localização:** {ativo['Localização']}")
+            
+            if 'Observações' in ativo and pd.notna(ativo['Observações']):
+                st.write(f"**Observações:** {ativo['Observações']}")
+            
+            if 'Foto do Ativo' in ativo and pd.notna(ativo['Foto do Ativo']):
+                st.image(ativo['Foto do Ativo'], caption="Foto do Ativo")
 
-except Exception as e:
-    st.error(f"ERRO INESPERADO ao tentar ler a URL com o Pandas.")
-    st.write(f"**Tipo de Erro:** {type(e).__name__}")
-    st.write(f"**Mensagem de Erro:** {e}")
-    st.info("Isso pode ser um problema de rede intermitente nos servidores do Streamlit ou um formato de CSV inválido.")
+        # SE O ATIVO NÃO FOI ENCONTRADO, MOSTRA O LINK PARA CADASTRO
+        else:
+            st.warning("Ativo ainda não cadastrado.")
+            st.header("Por favor, cadastre este ativo")
+
+            link_preenchido = f"{FORM_URL}?usp=pp_url&{FORM_ENTRY_ID}={id_ativo_escaneado}"
+            
+            st.markdown(f'''
+                <a href="{link_preenchido}" target="_blank" style="
+                    display: inline-block; padding: 12px 20px; font-size: 18px;
+                    font-weight: bold; color: white; background-color: #4CAF50;
+                    text-align: center; text-decoration: none; border-radius: 8px;">
+                    📝 Cadastrar Novo Ativo
+                </a>
+            ''', unsafe_allow_html=True)
+            st.info("Após preencher o formulário, escaneie o QR Code novamente para ver os detalhes.")
