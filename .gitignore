@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 # Adicionado para ignorar os segredos locais do Streamlit
-.streamlit/secrets.toml
+secrets.toml
 
 # C extensions
 *.so
