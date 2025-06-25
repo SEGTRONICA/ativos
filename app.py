@@ -49,7 +49,7 @@ else:
         if not ativo_info.empty:
             ativo = ativo_info.iloc[0]
             st.success(f"Ativo encontrado!")
-            st.write("ID DO ATIVO ABAIXO:")
+            st.warning("COPIAR O ID DO ATIVO ABAIXO:")
             st.code(f"{id_ativo_escaneado}")
             
             # Layout com duas colunas para melhor organização
