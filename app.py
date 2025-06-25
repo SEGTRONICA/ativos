@@ -39,7 +39,7 @@ else:
             st.success(f"Ativo encontrado!")
             ativo = ativo_info.iloc[0]
             st.header(ativo['Nome do dispositivo'])
-            st.subhear(ativo['Tipo do Ativo'])
+            st.subheader(ativo['Tipo do Ativo'])
             st.write(f"Numero do Pedido: {ativo['Numero do Pedido']}")
             st.write(f"**Localização:** {ativo['Cliente']}")
             st.write(f"**Modelo do Ativo**: {ativo['Modelo do Ativo']}")
