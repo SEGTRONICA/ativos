@@ -1,76 +1,85 @@
 import streamlit as st
 import pandas as pd
 
-# --- DEPURANDO O CÓDIGO DO VISUALIZADOR DE ATIVOS ---
+# --- CÓDIGO DE PRODUÇÃO DO VISUALIZADOR DE ATIVOS ---
 
-st.set_page_config(layout="centered")
-st.title("Depurando o Visor de Ativos")
-st.write("---")
+# Configuração inicial da página
+st.set_page_config(layout="centered", page_title="Visor de Ativos")
+st.title("Visor de Ativos")
 
-# --- PASSO 1: Verificando os Segredos (Secrets) ---
-st.header("PASSO 1: Verificando os Segredos")
+# --- LÓGICA PRINCIPAL ---
+
+# 1. Carrega os segredos (URLs) de forma segura
 try:
     SHEET_URL = st.secrets["SHEET_URL"]
     FORM_URL = st.secrets["FORM_URL"]
-    st.success("Segredos SHEET_URL e FORM_URL carregados com sucesso!")
+    # IMPORTANTE: Garanta que este ID do campo está correto!
+    FORM_ENTRY_ID = "entry.xxxxxxxx" # Substitua pelo seu entry.ID real
 except KeyError as e:
-    st.error(f"ERRO CRÍTICO: O segredo '{e}' não foi encontrado! Vá em Settings -> Secrets e configure-o.")
-    st.stop() # Para a execução se os segredos não existirem
-
-# --- PASSO 2: Lendo o ID da URL ---
-st.header("PASSO 2: Lendo o ID da URL")
-query_params = st.query_params
-id_ativo_escaneado = query_params.get("id_ativo")
-
-if not id_ativo_escaneado:
-    st.warning("Nenhum 'id_ativo' encontrado na URL. Escaneie um QR Code para começar.")
+    st.error(f"ERRO DE CONFIGURAÇÃO: O segredo '{e}' não foi encontrado! Vá em Settings -> Secrets e configure-o no painel do Streamlit.")
     st.stop()
-else:
-    st.success(f"ID encontrado na URL: `{id_ativo_escaneado}`")
 
-# --- PASSO 3: Carregando e Verificando a Planilha ---
-st.header("PASSO 3: Carregando e Verificando a Planilha")
+# Função para carregar e preparar os dados da planilha
 def carregar_dados(url):
+    # Transforma a URL para exportação direta em CSV
     csv_url = url.replace("/edit?usp=sharing", "/export?format=csv")
     try:
         df = pd.read_csv(csv_url)
-        st.success("Planilha Google carregada com sucesso!")
+        # Garante que a coluna do ID seja do tipo string para a comparação correta
+        df['ID do Ativo'] = df['ID do Ativo'].astype(str)
         return df
-    except Exception as e:
-        st.error(f"ERRO ao carregar a Planilha Google: {e}")
-        return None
+    except Exception:
+        # Se a planilha não puder ser carregada, retorna um DataFrame vazio
+        return pd.DataFrame()
 
-df = carregar_dados(SHEET_URL)
+# 2. Pega o ID do ativo da URL da página
+query_params = st.query_params
+id_ativo_escaneado = query_params.get("id_ativo")
 
-if df is None:
-    st.error("A execução foi interrompida porque a planilha não pôde ser carregada.")
-    st.stop()
-
-# --- PASSO 4: Verificando a Coluna e os Tipos de Dados ---
-st.header("PASSO 4: Verificando a Coluna e os Tipos")
-if 'ID do Ativo' not in df.columns:
-    st.error(f"ERRO CRÍTICO: A coluna 'ID do Ativo' não foi encontrada na sua planilha!")
-    st.write("Colunas encontradas:", df.columns.to_list())
-    st.stop()
+# 3. Decide o que mostrar na tela
+if not id_ativo_escaneado:
+    # Se nenhum ID for passado na URL, mostra a tela de boas-vindas
+    st.info("Bem-vindo! Escaneie o QR Code de um ativo para começar.")
 else:
-    st.success("A coluna 'ID do Ativo' foi encontrada na planilha.")
-    # Forçando a conversão para string para garantir a comparação correta
-    df['ID do Ativo'] = df['ID do Ativo'].astype(str)
-    st.info("A coluna 'ID do Ativo' foi convertida para texto para garantir a comparação.")
+    # Se um ID foi passado, carrega os dados
+    df = carregar_dados(SHEET_URL)
+    
+    if df.empty:
+        st.error("Não foi possível carregar os dados dos ativos. Verifique o link da planilha e as permissões de compartilhamento.")
+    else:
+        # Procura pelo ativo na planilha
+        ativo_info = df[df['ID DO ATIVO'] == id_ativo_escaneado]
 
+        # SE O ATIVO FOI ENCONTRADO, MOSTRA OS DADOS
+        if not ativo_info.empty:
+            st.success(f"Ativo encontrado!")
+            # Pega a primeira linha de dados do ativo encontrado
+            ativo = ativo_info.iloc[0]
+            
+            st.header(ativo['Nome do Ativo'])
+            st.write(f"**Localização:** {ativo['Localização']}")
+            
+            if 'Observações' in ativo and pd.notna(ativo['Observações']):
+                st.write(f"**Observações:** {ativo['Observações']}")
+            
+            if 'Foto do Ativo' in ativo and pd.notna(ativo['Foto do Ativo']):
+                st.image(ativo['Foto do Ativo'], caption="Foto do Ativo")
 
-# --- PASSO 5: Procurando pelo ID na Planilha ---
-st.header("PASSO 5: Procurando pelo ID")
-st.write(f"Procurando por `{id_ativo_escaneado}` na coluna 'ID do Ativo'...")
+        # SE O ATIVO NÃO FOI ENCONTRADO, MOSTRA O LINK PARA CADASTRO
+        else:
+            st.warning("Ativo ainda não cadastrado.")
+            st.header("Por favor, cadastre este ativo")
 
-ativo_info = df[df['ID do Ativo'] == id_ativo_escaneado]
-
-if not ativo_info.empty:
-    st.success("SUCESSO! O ativo foi encontrado na planilha. Mostrando os detalhes:")
-    # Aqui iria o código para mostrar os detalhes do ativo
-    st.dataframe(ativo_info)
-else:
-    st.warning("AVISO: O ID não foi encontrado na planilha. Mostrando o link de cadastro.")
-    # Aqui iria o código para mostrar o link do formulário
-    st.markdown(f"### [CLIQUE AQUI PARA CADASTRAR](https://forms.gle/SEU_LINK_AQUI)", unsafe_allow_html=True) # Coloque seu link aqui para teste
-    st.info("Se você já cadastrou e está vendo esta mensagem, o problema pode ser um espaço em branco ou caractere invisível no ID da planilha.")
+            # Cria o link pré-preenchido para o Google Form
+            link_preenchido = f"{FORM_URL}?usp=pp_url&{FORM_ENTRY_ID}={id_ativo_escaneado}"
+            
+            # Botão de cadastro grande e claro
+            st.markdown(f'''
+                <a href="{link_preenchido}" target="_blank" style="
+                    display: inline-block; padding: 12px 20px; font-size: 18px;
+                    font-weight: bold; color: white; background-color: #4CAF50;
+                    text-align: center; text-decoration: none; border-radius: 8px;">
+                    📝 Cadastrar Novo Ativo
+                </a>
+            ''', unsafe_allow_html=True)
+            st.info("Após preencher o formulário, escaneie o QR Code novamente para ver os detalhes.")
