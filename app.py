@@ -9,7 +9,7 @@ st.title("Visor de Ativos")
 try:
     SHEET_URL = st.secrets["SHEET_URL"]
     FORM_URL = st.secrets["FORM_URL"]
-    FORM_ENTRY_ID = "entry.49708730" # O ID que você configurou
+    FORM_ENTRY_ID = "entry.1882245704" # O ID que você configurou
 except KeyError as e:
     st.error(f"ERRO DE CONFIGURAÇÃO: O segredo '{e}' não foi encontrado!")
     st.stop()
