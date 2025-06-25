@@ -56,7 +56,7 @@ else:
             st.info("Este é o identificador único para este ativo. Você vai precisar colá-lo no formulário.")
             
             # Exibe o ID e o botão para copiar
-            with st.button("📋", key="copy")
+            with st.button("📋", key="copy"):
                 clipboard.copy(id_ativo_escaneado)
                 st.code(id_ativo_escaneado, language="text")
 
