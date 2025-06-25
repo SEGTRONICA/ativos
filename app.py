@@ -63,7 +63,7 @@ else:
                 st.write(f"**Modelo do Ativo:** {ativo['Modelo do Ativo']}")
                 st.write(f"**Tipo de negócio:** {ativo['Tipo de negócio']}")
                 st.write(f"**Data de instalação:** {ativo['Data de instalação']}")
-                st.write(f"**Instalador:** {ativo['Endereço de e-mail']}")
+                st.write(f"**Cadastrado por:** {ativo['Endereço de e-mail']}")
             
             with col2:
                 st.header("Registrar Nova Atuação")
