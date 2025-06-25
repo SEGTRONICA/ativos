@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 st.set_page_config(layout="wide", page_title="Visor de Ativos")
-st.title("Visor de Ativos e Manutenção")
+st.title("Ativos Segtrônica")
 
 # --- CARREGAMENTO DOS SEGREDOS --
 try:
