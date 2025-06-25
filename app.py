@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from streamlit_clipboard import st_clipboard
 
 # --- CÓDIGO DE PRODUÇÃO FINAL (VERSÃO "COPIAR E COLAR") ---
 
