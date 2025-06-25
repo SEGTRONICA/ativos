@@ -57,8 +57,9 @@ else:
             st.info("Este é o identificador único para este ativo. Você vai precisar colá-lo no formulário.")
             
             # Exibe o ID e o botão para copiar
-            copy_button(id_ativo_escaneado, "Copiar ID")
-            st.code(id_ativo_escaneado, language="text")
+            with st.button("📋", key="copy")
+                clipboard.copy(id_ativo_escaneado)
+                st.code(id_ativo_escaneado, language="text")
 
             st.subheader("Passo 2: Abra o formulário e cole o ID")
             st.markdown(f'''
