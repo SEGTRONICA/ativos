@@ -46,8 +46,7 @@ else:
             st.write(f"**Tipo de negócio: {ativo['Tipo de negócio']}**")
             st.write(f"Data de instalação: {ativo['Data de instalação']}")
             st.write(f"Ultima autação: {ativo['Data e descrição da última atuação no dispositivo']}")
-            st.write(f"Instalador: {ativo['']}")
-            st.write(f"Data de instalação: {ativo['Endereço de e-mail']}")
+            st.write(f"Instalador: {ativo['Endereço de e-mail']}")
                 
         else:
             st.warning("Ativo ainda não cadastrado.")
