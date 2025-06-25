@@ -14,7 +14,7 @@ try:
     SHEET_URL = st.secrets["SHEET_URL"]
     FORM_URL = st.secrets["FORM_URL"]
     # IMPORTANTE: Garanta que este ID do campo está correto!
-    FORM_ENTRY_ID = "entry.xxxxxxxx" # Substitua pelo seu entry.ID real
+    FORM_ENTRY_ID = "entry.49708730" # Substitua pelo seu entry.ID real
 except KeyError as e:
     st.error(f"ERRO DE CONFIGURAÇÃO: O segredo '{e}' não foi encontrado! Vá em Settings -> Secrets e configure-o no painel do Streamlit.")
     st.stop()
