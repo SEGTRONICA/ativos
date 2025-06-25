@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
+from streamlit_copy_button import copy_button
 
+# --- CÓDIGO DE PRODUÇÃO FINAL (VERSÃO "COPIAR E COLAR") ---
 
 st.set_page_config(layout="centered", page_title="Visor de Ativos")
 st.title("Visor de Ativos")
@@ -8,7 +10,6 @@ st.title("Visor de Ativos")
 try:
     SHEET_URL = st.secrets["SHEET_URL"]
     FORM_URL = st.secrets["FORM_URL"]
-    FORM_ENTRY_ID = "entry.1882245704" 
 except KeyError as e:
     st.error(f"ERRO DE CONFIGURAÇÃO: O segredo '{e}' não foi encontrado!")
     st.stop()
@@ -31,10 +32,9 @@ else:
     df = carregar_dados(SHEET_URL)
     
     if df.empty and 'ID DO ATIVO' not in df.columns:
-        st.error("Não foi possível carregar os dados ou a coluna 'ID DO ATIVO' não foi encontrada. Verifique o nome da coluna na planilha.")
+        st.error("Não foi possível carregar os dados ou a coluna 'ID DO ATIVO' não foi encontrada. Verifique a planilha.")
     else:
         ativo_info = df[df['ID DO ATIVO'] == id_ativo_escaneado]
-
         if not ativo_info.empty:
             st.success(f"Ativo encontrado!")
             ativo = ativo_info.iloc[0]
@@ -47,20 +47,27 @@ else:
             st.write(f"Data de instalação: {ativo['Data de instalação']}")
             st.write(f"Ultima autação: {ativo['Data e descrição da última atuação no dispositivo']}")
             st.write(f"Instalador: {ativo['Endereço de e-mail']}")
-                
+
         else:
+            # --- NOVA LÓGICA DE CADASTRO ---
             st.warning("Ativo ainda não cadastrado.")
-            st.header("Por favor, cadastre este ativo")
+            st.header("Siga os passos para cadastrar:")
 
-            link_preenchido = f"{FORM_URL}?usp=pp_url&{FORM_ENTRY_ID}={id_ativo_escaneado}"
+            st.subheader("Passo 1: Copie o ID do Ativo")
+            st.info("Este é o identificador único para este ativo. Você vai precisar colá-lo no formulário.")
             
+            # Exibe o ID e o botão para copiar
+            copy_button(id_ativo_escaneado, "Copiar ID")
+            st.code(id_ativo_escaneado, language="text")
 
+            st.subheader("Passo 2: Abra o formulário e cole o ID")
             st.markdown(f'''
-                <a href="{link_preenchido}" target="_blank" style="
+                <a href="{FORM_URL}" target="_blank" style="
                     display: inline-block; padding: 12px 20px; font-size: 18px;
                     font-weight: bold; color: white; background-color: #4CAF50;
                     text-align: center; text-decoration: none; border-radius: 8px;">
-                    📝 Cadastrar Novo Ativo
+                    📝 Abrir Formulário de Cadastro
                 </a>
             ''', unsafe_allow_html=True)
-            st.info("Se o preenchimento automático não funcionar, o 'entry.ID' no código está incorreto.")
+
+            st.info("Após preencher e enviar o formulário, escaneie o QR Code novamente para ver os detalhes do ativo.")
