@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 st.set_page_config(layout="wide", page_title="Visor de Ativos")
-st.title("Ativos Segtrônica")
+st.title("Ativos - Segtrônica")
 st.logo('logo.png',size='large')
 # --- CARREGAMENTO DOS SEGREDOS --
 try:
