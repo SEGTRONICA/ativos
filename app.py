@@ -5,65 +5,7 @@ import yaml
 from yaml.loader import SafeLoader
 
 st.set_page_config(layout="wide", page_title="Visor de Ativos - Segtrônica",page_icon="logo.png")
-# --- CARREGANDO O ARQUIVO DE CONFIGURAÇÃO ---
-with open('config.yaml') as file:
-    config = yaml.load(file, Loader=SafeLoader)
 
-# --- INICIALIZAÇÃO DO AUTENTICADOR ---
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days']
-)
-
-# --- TELA DE LOGIN ---
-# CORREÇÃO PRINCIPAL: O método login() agora é chamado sozinho.
-# Ele não retorna mais valores. O estado é verificado via st.session_state.
-authenticator.login()
-
-if st.session_state["authentication_status"]:
-    # --- PÁGINA PRINCIPAL APÓS LOGIN ---
-    # O botão de logout também é chamado sozinho e atualiza o session_state
-    st.sidebar.title(f'Bem-vindo(a), *{st.session_state["name"]}*')
-    authenticator.logout('Logout', 'sidebar')
-
-    st.title('Dashboard de Gerenciamento de Ativos 📈')
-
-    # Exemplo de como usar dados do usuário logado:
-    st.write(f"Usuário: `{st.session_state['username']}`")
-    
-    # Exemplo de lógica baseada no papel (role) do usuário
-    try:
-        user_role = config['credentials']['usernames'][st.session_state['username']]['role']
-        if user_role == 'admin':
-            st.success("Você tem acesso de Administrador.")
-            # Coloque aqui os componentes visíveis apenas para admins
-        else:
-            st.info("Você tem acesso de Visualizador.")
-    except KeyError:
-        st.warning("Papel (role) do usuário não definido no arquivo de configuração.")
-
-    # SEU CÓDIGO DO DASHBOARD VAI AQUI
-    st.write("Aqui você pode visualizar e gerenciar seus ativos.")
-
-
-elif st.session_state["authentication_status"] is False:
-    st.error('Usuário/senha incorreto')
-elif st.session_state["authentication_status"] is None:
-    st.warning('Por favor, insira seu usuário e senha')
-
-
-# --- REGISTRO DE NOVOS USUÁRIOS (Fora da lógica de login) ---
-# Esta parte permanece a mesma da correção anterior.
-st.divider()
-try:
-    if authenticator.register_user('Registrar novo usuário', preauthorization=True):
-        st.success('Usuário registrado com sucesso! Por favor, faça o login para continuar.')
-        with open('config.yaml', 'w') as file:
-            yaml.dump(config, file, default_flow_style=False)
-except Exception as e:
-    st.error(e)
 st.title("Ativos - Segtrônica")
 st.logo('logo.png',size='large')
 # --- CARREGAMENTO DOS SEGREDOS --
