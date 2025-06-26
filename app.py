@@ -35,9 +35,9 @@ df_ativos = carregar_dados(SHEET_URL_ATIVOS)
 df_historico = carregar_dados(HISTORICO_SHEET_URL)
 
 if not id_ativo_escaneado:
-    st.info("Bem-vindo! Escaneie o QR Code de um ativo para começar.")
     st.subheader("Lista de Ativos Cadastrados")
     if not df_ativos.empty:
+        st.sidebar.markdown("### Lista de Ativos")
         st.dataframe(df_ativos)
 
 else:
