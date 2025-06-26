@@ -12,6 +12,6 @@ cookie:
   expiry_days: 30
   key: 'uma_chave_secreta_aleatoria' # Mude para uma string secreta e única
   name: some_cookie_name
-preauthorized:
+register_user:
   emails:
   - melsmith@gmail.com
