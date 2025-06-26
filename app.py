@@ -101,4 +101,6 @@ else:
         else:
             # Lógica para cadastrar um novo ativo (simplificada)
             st.warning("Ativo ainda não cadastrado.")
+            st.warning("COPIAR O ID DO ATIVO ABAIXO:")
+            st.code(f"{id_ativo_escaneado}")
             st.markdown(f'<a href="{FORM_URL_CADASTRO}" target="_blank">Clique aqui para ir ao formulário de cadastro.</a>', unsafe_allow_html=True)
