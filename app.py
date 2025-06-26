@@ -54,8 +54,8 @@ else:
             
             # Layout com duas colunas para melhor organização
             tab1, tab2 = st.tabs(["📄 Detalhes do Ativo", "⚙️ Histórico de Atuações"])
-            col1, col2 = st.columns(2)
             with tab1:
+                col1, col2 = st.columns(2)
                 with col1:
                     st.header(ativo['Nome do dispositivo'])
                     st.subheader(ativo['Tipo do Ativo'])
@@ -80,7 +80,6 @@ else:
                         </a>
                     ''', unsafe_allow_html=True)
 
-            st.divider()
             with tab2:
                 # --- SEÇÃO DE HISTÓRICO DE MANUTENÇÃO ---
                 st.header("Histórico de Atuações no Dispositivo")
