@@ -1,0 +1,17 @@
+credentials:
+  usernames:
+    jsmith:
+      email: jsmith@example.com
+      name: John Smith
+      password: 'abc' # Senha em texto plano (será hasheada no próximo passo)
+    rbriggs:
+      email: rbriggs@example.com
+      name: Rebecca Briggs
+      password: 'def' # Senha em texto plano (será hasheada no próximo passo)
+cookie:
+  expiry_days: 30
+  key: 'uma_chave_secreta_aleatoria' # Mude para uma string secreta e única
+  name: some_cookie_name
+preauthorized:
+  emails:
+  - melsmith@gmail.com

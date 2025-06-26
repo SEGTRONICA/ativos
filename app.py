@@ -1,7 +1,43 @@
 import streamlit as st
 import pandas as pd
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
 
 st.set_page_config(layout="wide", page_title="Visor de Ativos - Segtrônica",page_icon="logo.png")
+
+with open('config.yaml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
+
+# --- TELA DE LOGIN ---
+name, authentication_status, username = authenticator.login('Login', 'main')
+
+if st.session_state["authentication_status"]:
+    # --- PÁGINA PRINCIPAL APÓS LOGIN ---
+    st.sidebar.title(f'Bem-vindo(a), *{st.session_state["name"]}*')
+    authenticator.logout('Logout', 'sidebar')
+
+    st.title('Dashboard de Gerenciamento de Ativos 📈')
+
+    # SEU CÓDIGO DO DASHBOARD VAI AQUI
+    # Exemplo:
+    st.write("Aqui você pode visualizar e gerenciar seus ativos.")
+    # Adicione seus gráficos, tabelas e funcionalidades aqui.
+
+
+elif st.session_state["authentication_status"] is False:
+    st.error('Usuário/senha incorreto')
+elif st.session_state["authentication_status"] is None:
+    st.warning('Por favor, insira seu usuário e senha')
+
 st.title("Ativos - Segtrônica")
 st.logo('logo.png',size='large')
 # --- CARREGAMENTO DOS SEGREDOS --
