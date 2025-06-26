@@ -53,8 +53,8 @@ else:
             st.code(f"{id_ativo_escaneado}")
             
             # Layout com duas colunas para melhor organização
-            col1, col2 = st.columns(2)
             tab1, tab2 = st.tabs(["📄 Detalhes do Ativo", "⚙️ Histórico de Atuações"])
+            col1, col2 = st.columns(2)
             with tab1:
                 with col1:
                     st.header(ativo['Nome do dispositivo'])
