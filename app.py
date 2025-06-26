@@ -6,7 +6,7 @@ from yaml.loader import SafeLoader
 
 
 st.set_page_config(layout="wide", page_title="Visor de Ativos - Segtrônica",page_icon="logo.png")
-with open('../config.yaml') as file:
+with open('config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
 authenticator = Authenticate(
