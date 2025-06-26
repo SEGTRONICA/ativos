@@ -5,20 +5,21 @@ import yaml
 from yaml.loader import SafeLoader
 
 st.set_page_config(layout="wide", page_title="Visor de Ativos - Segtrônica",page_icon="logo.png")
-
+# --- CARREGANDO O ARQUIVO DE CONFIGURAÇÃO ---
 with open('config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
+# --- CORREÇÃO 1: REMOVENDO O PARÂMETRO 'preauthorized' DA INICIALIZAÇÃO ---
 authenticator = stauth.Authenticate(
     config['credentials'],
     config['cookie']['name'],
     config['cookie']['key'],
-    config['cookie']['expiry_days'],
-    config['register_user']
+    config['cookie']['expiry_days']
 )
 
 # --- TELA DE LOGIN ---
-name, authentication_status, username = authenticator.login('Login', 'main')
+# O método login continua o mesmo
+name, authentication_status, username = authenticator.login(fields={'Form name': 'Login'})
 
 if st.session_state["authentication_status"]:
     # --- PÁGINA PRINCIPAL APÓS LOGIN ---
@@ -28,15 +29,29 @@ if st.session_state["authentication_status"]:
     st.title('Dashboard de Gerenciamento de Ativos 📈')
 
     # SEU CÓDIGO DO DASHBOARD VAI AQUI
-    # Exemplo:
     st.write("Aqui você pode visualizar e gerenciar seus ativos.")
-    # Adicione seus gráficos, tabelas e funcionalidades aqui.
-
 
 elif st.session_state["authentication_status"] is False:
     st.error('Usuário/senha incorreto')
 elif st.session_state["authentication_status"] is None:
     st.warning('Por favor, insira seu usuário e senha')
+
+
+# --- CORREÇÃO 2: ATUALIZANDO A FORMA DE REGISTRAR USUÁRIOS ---
+# A verificação de pré-autorização agora acontece aqui.
+# A biblioteca irá procurar automaticamente pela chave 'preauthorized' no seu arquivo config.yaml
+# quando preauthorization=True.
+st.divider() # Adiciona uma linha visual de separação
+try:
+    # Defina preauthorization=True para exigir que o email esteja na lista do config.yaml
+    # Defina preauthorization=False para permitir que qualquer um se registre
+    if authenticator.register_user('Registrar novo usuário', preauthorization=True):
+        st.success('Usuário registrado com sucesso! Por favor, faça o login para continuar.')
+        # Atualiza o arquivo de configuração com o novo usuário
+        with open('config.yaml', 'w') as file:
+            yaml.dump(config, file, default_flow_style=False)
+except Exception as e:
+    st.error(e)
 
 st.title("Ativos - Segtrônica")
 st.logo('logo.png',size='large')
