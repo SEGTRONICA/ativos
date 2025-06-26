@@ -1,25 +1,15 @@
-# .streamlit/config.toml
-
-# Define a configuração do tema da aplicação
 [theme]
-
-# Cor primária para os elementos interativos (botões, sliders, etc.)
-# Exemplo: um tom de azul vibrante
-primaryColor = "#7792E3"
+# Cor principal, usada em botões e elementos interativos
+primaryColor="#FFA500"  # Um laranja, por exemplo
 
 # Cor de fundo principal da aplicação
-# Forçando um tom escuro
-backgroundColor = "#0E1117"
+backgroundColor="#F0F2F6" # Um cinza bem claro
 
-# Cor de fundo para elementos secundários (como a sidebar)
-secondaryBackgroundColor = "#262730"
+# Cor de fundo de elementos como a barra lateral e caixas de código
+secondaryBackgroundColor="#FFFFFF" # Branco
 
 # Cor do texto principal
-textColor = "#FAFAFA"
+textColor="#262730" # Um cinza escuro
 
-# Fonte a ser usada (sans serif, serif, or monospace)
-font = "sans serif"
-
-# Define o tema base como "dark" (escuro).
-# Esta é a linha mais importante para o seu pedido.
-base = "dark"
+# Cor da fonte
+font="sans serif"
