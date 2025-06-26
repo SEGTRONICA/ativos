@@ -1,17 +1,17 @@
 credentials:
   usernames:
     jsmith:
-      email: jsmith@example.com
+      email: jsmith@gmail.com
       name: John Smith
-      password: 'abc' # Senha em texto plano (será hasheada no próximo passo)
+      password: abc # To be replaced with hashed password
     rbriggs:
-      email: rbriggs@example.com
+      email: rbriggs@gmail.com
       name: Rebecca Briggs
-      password: 'def' # Senha em texto plano (será hasheada no próximo passo)
+      password: def # To be replaced with hashed password
 cookie:
   expiry_days: 30
-  key: 'uma_chave_secreta_aleatoria' # Mude para uma string secreta e única
-  name: some_cookie_name
-register_user:
+  key: random_signature_key # Must be string
+  name: random_cookie_name
+preauthorized:
   emails:
-  - melsmith@gmail.com
+  - melsby@gmail.com
