@@ -14,8 +14,8 @@ pg.run()
 
 if st.session_state["authenticated"]:
     pages = [
-        st.Page("pages/1_home.py", title="Home"),
-        st.Page("pages/2_ativo.py", title="Detalhes do Ativo")
+        st.Page("pages/1_ativo.py", title="Detalhes do Ativo")
+        st.Page("pages/2_home.py", title="Home"),    
     ]   
     pg = st.navigation(pages)
     pg.run()
